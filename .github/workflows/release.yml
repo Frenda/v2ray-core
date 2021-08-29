@@ -57,6 +57,8 @@ jobs:
             goarch: arm64
           - goos: linux
             goarch: riscv64
+          - goos: windows
+            goarch: arm64
           # BEGIN MIPS
           - goos: linux
             goarch: mips64
@@ -98,7 +100,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.16.4
+          go-version: ^1.17
 
       - name: Get project dependencies
         run: go mod download
@@ -121,6 +123,7 @@ jobs:
       - name: Download geo files
         run: |
           wget -O release/config/geoip.dat "https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat"
+          wget -O release/config/geoip-only-cn-private.dat "https://raw.githubusercontent.com/v2fly/geoip/release/geoip-only-cn-private.dat"
           wget -O release/config/geosite.dat "https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat"
 
       - name: Prepare package
@@ -169,7 +172,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.16.4
+          go-version: ^1.17
 
       - uses: actions/download-artifact@v2
         with:
