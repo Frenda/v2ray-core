@@ -98,7 +98,7 @@ func New(ctx context.Context, config *Config) (*DNS, error) {
 
 	// MatcherInfos is ensured to cover the maximum index domainMatcher could return, where matcher's index starts from 1
 	matcherInfos := make([]DomainMatcherInfo, domainRuleCount+1)
-	domainMatcher := &strmatcher.MatcherGroup{}
+	domainMatcher := &strmatcher.LinearIndexMatcher{}
 	geoipContainer := router.GeoIPMatcherContainer{}
 
 	for _, endpoint := range config.NameServers {
@@ -315,9 +315,8 @@ func init() {
 		return New(ctx, config.(*Config))
 	}))
 
-	common.Must(common.RegisterConfig((*SimplifiedConfig)(nil), func(ctx context.Context, config interface{}) (interface{}, error) {
-
-		ctx = cfgcommon.NewConfigureLoadingContext(context.Background())
+	common.Must(common.RegisterConfig((*SimplifiedConfig)(nil), func(ctx context.Context, config interface{}) (interface{}, error) { // nolint: staticcheck
+		ctx = cfgcommon.NewConfigureLoadingContext(context.Background()) // nolint: staticcheck
 
 		geoloadername := platform.NewEnvFlag("v2ray.conf.geoloader").GetValue(func() string {
 			return "standard"

@@ -135,8 +135,8 @@ func LoadConfig(formatName string, input interface{}) (*Config, error) {
 // * string of a single filename/url(s) to open to read
 // * io.Reader that reads a config content (the original way)
 func loadSingleConfigAutoFormat(input interface{}) (*Config, error) {
-	if file, ok := input.(string); ok {
-		extension := getExtension(file)
+	if file, ok := input.(cmdarg.Arg); ok {
+		extension := getExtension(file.String())
 		if extension != "" {
 			lowerName := strings.ToLower(extension)
 			if f, found := configLoaderByExt[lowerName]; found {
@@ -154,9 +154,8 @@ func loadSingleConfigAutoFormat(input interface{}) (*Config, error) {
 		c, err := f.Loader(input)
 		if err == nil {
 			return c, nil
-		} else {
-			errorReasons.WriteString(fmt.Sprintf("unable to parse as %v:%v;", f.Name[0], err.Error()))
 		}
+		errorReasons.WriteString(fmt.Sprintf("unable to parse as %v:%v;", f.Name[0], err.Error()))
 	}
 	return nil, newError("tried all loaders but failed when attempting to parse: ", input, ";", errorReasons.String()).AtWarning()
 }
