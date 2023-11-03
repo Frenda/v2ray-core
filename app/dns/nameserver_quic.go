@@ -377,12 +377,23 @@ func (s *QUICNameServer) getConnection(ctx context.Context) (quic.Connection, er
 }
 
 func (s *QUICNameServer) openConnection(ctx context.Context) (quic.Connection, error) {
-	tlsConfig := tls.Config{}
+	tlsConfig := tls.Config{
+		ServerName: func() string {
+			switch s.destination.Address.Family() {
+			case net.AddressFamilyIPv4, net.AddressFamilyIPv6:
+				return s.destination.Address.IP().String()
+			case net.AddressFamilyDomain:
+				return s.destination.Address.Domain()
+			default:
+				panic("unknown address family")
+			}
+		}(),
+	}
 	quicConfig := &quic.Config{
 		HandshakeIdleTimeout: handshakeIdleTimeout,
 	}
 
-	conn, err := quic.DialAddrContext(ctx, s.destination.NetAddr(), tlsConfig.GetTLSConfig(tls.WithNextProto(NextProtoDQ)), quicConfig)
+	conn, err := quic.DialAddr(ctx, s.destination.NetAddr(), tlsConfig.GetTLSConfig(tls.WithNextProto(NextProtoDQ)), quicConfig)
 	if err != nil {
 		return nil, err
 	}
